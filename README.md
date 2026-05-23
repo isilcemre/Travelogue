@@ -56,7 +56,7 @@ src/
             ├── login.html
             ├── register.html
             ├── form.html                 # Add new entry
-            └── list.html                # My travel entries
+            └── list.html                 # My travel entries
 ```
 
 ---
