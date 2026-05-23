@@ -107,35 +107,35 @@ The app will start on `http://localhost:8080`.
 6. Update your username or password from the **Profile** page.
 
 
-##Screenshots
+## Screenshots
 
-<img width="1067" height="869" alt="travelDetail" src="https://github.com/user-attachments/assets/8bdde083-5008-40d1-80f1-1b83963edd01" />
-
-
-<img width="1063" height="887" alt="travels" src="https://github.com/user-attachments/assets/66bb6c3c-b1bc-49ea-a3c7-7a104ecd0baf" />
+<img width="1898" height="960" alt="welcome" src="https://github.com/user-attachments/assets/2804c206-912c-4648-a5d8-9aae77874e2f" />
 
 
-<img width="672" height="951" alt="register" src="https://github.com/user-attachments/assets/420196b1-e2dc-47a9-9382-cd9da390951e" />
+<img width="1901" height="969" alt="dashboard" src="https://github.com/user-attachments/assets/1973f058-d915-4dee-9e11-5bea6ace1c82" />
 
 
-<img width="1762" height="883" alt="welcome" src="https://github.com/user-attachments/assets/077d6d42-5b4e-4d86-8e6b-10182d0d0981" />
+<img width="1061" height="695" alt="map" src="https://github.com/user-attachments/assets/e2fec2cd-5532-4a26-a038-41be0826e942" />
 
 
-<img width="1901" height="969" alt="dashboard" src="https://github.com/user-attachments/assets/6dcaed23-9791-403f-a6f7-4ca115c6812b" />
+<img width="1920" height="1080" alt="login" src="https://github.com/user-attachments/assets/7febe426-649b-446f-8a88-4daf0d1afb9a" />
 
 
-<img width="1117" height="737" alt="search" src="https://github.com/user-attachments/assets/428e77f4-49ba-402e-9609-f6158d463aec" />
+<img width="822" height="427" alt="choseCountry" src="https://github.com/user-attachments/assets/050c9c5d-c9c1-4281-b829-24ebb170377e" />
 
 
-<img width="1061" height="695" alt="map" src="https://github.com/user-attachments/assets/1b4fda1b-163e-4249-8d95-6cb844aeeb09" />
+<img width="1898" height="970" alt="addTravel" src="https://github.com/user-attachments/assets/fa4fefdf-2624-4393-b24b-b971b7d69cfe" />
 
 
-<img width="822" height="427" alt="choseCountry" src="https://github.com/user-attachments/assets/3970dc5a-4890-456a-998b-383e8d269e98" />
+<img width="1901" height="966" alt="travels" src="https://github.com/user-attachments/assets/8c6d6837-fdd7-4d99-8bfc-8379e979fff3" />
 
 
-<img width="462" height="332" alt="profile" src="https://github.com/user-attachments/assets/a4437b7a-54c2-40c4-8ffa-4041cd767414" />
+<img width="1920" height="972" alt="travelDetail" src="https://github.com/user-attachments/assets/423bd9b3-1017-4d99-ae0e-ea371915383b" />
 
 
-<img width="934" height="968" alt="addTravel" src="https://github.com/user-attachments/assets/e1dabf18-de79-4de7-ba04-59c11de7f99d" />
+<img width="1117" height="737" alt="search" src="https://github.com/user-attachments/assets/e275dc98-3c86-4f68-8fdf-1f9ac80173f3" />
+
+
+<img width="1919" height="969" alt="profile" src="https://github.com/user-attachments/assets/99df0f37-db41-4b67-8612-0aa7b786211b" />
 
 
