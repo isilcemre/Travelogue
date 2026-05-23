@@ -121,9 +121,6 @@ The app will start on `http://localhost:8080`.
 <img width="1920" height="1080" alt="login" src="https://github.com/user-attachments/assets/7febe426-649b-446f-8a88-4daf0d1afb9a" />
 
 
-<img width="822" height="427" alt="choseCountry" src="https://github.com/user-attachments/assets/050c9c5d-c9c1-4281-b829-24ebb170377e" />
-
-
 <img width="1898" height="970" alt="addTravel" src="https://github.com/user-attachments/assets/fa4fefdf-2624-4393-b24b-b971b7d69cfe" />
 
 
