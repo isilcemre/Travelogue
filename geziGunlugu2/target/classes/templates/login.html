@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Giriş Yap — Gezi Günlüğüm</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --ink: #1a1a2e;
+            --paper: #f5f0e8;
+            --sand: #e8dfc8;
+            --terracotta: #c4724a;
+            --terracotta-dark: #a85c38;
+            --sage: #7a9e7e;
+            --muted: #8a8070;
+            --border: #d4c9b0;
+            --card-bg: #fffdf7;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            min-height: 100vh;
+            background-color: var(--paper);
+            background-image:
+                radial-gradient(ellipse at 10% 20%, rgba(196,114,74,0.09) 0%, transparent 50%),
+                radial-gradient(ellipse at 90% 80%, rgba(122,158,126,0.10) 0%, transparent 50%),
+                url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c4724a' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            font-family: 'DM Sans', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 32px 16px;
+        }
+
+        .login-wrap {
+            width: 100%;
+            max-width: 420px;
+            animation: fadeUp 0.6s ease both;
+        }
+
+        /* ── Header ── */
+        .login-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .brand-link {
+            text-decoration: none;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-icon {
+            width: 52px; height: 52px;
+            background: var(--terracotta);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 8px 24px rgba(196,114,74,0.35);
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%,100% { box-shadow: 0 8px 24px rgba(196,114,74,0.35); }
+            50%      { box-shadow: 0 12px 32px rgba(196,114,74,0.55); }
+        }
+
+        .brand-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            color: var(--ink);
+        }
+
+        .brand-name em {
+            font-style: italic;
+            color: var(--terracotta);
+        }
+
+        /* ── Card ── */
+        .login-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 40px 40px 36px;
+            box-shadow:
+                0 2px 0 var(--sand),
+                0 4px 0 rgba(196,114,74,0.07),
+                0 16px 56px rgba(26,26,46,0.10);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--terracotta) 0%, var(--sage) 100%);
+        }
+
+        .card-heading {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            color: var(--ink);
+            margin-bottom: 6px;
+        }
+
+        .card-sub {
+            font-size: 0.82rem;
+            color: var(--muted);
+            font-weight: 300;
+            margin-bottom: 28px;
+        }
+
+        /* ── Alerts ── */
+        .alert-custom {
+            border-radius: 9px;
+            padding: 11px 15px;
+            font-size: 0.84rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            line-height: 1.5;
+        }
+
+        .alert-success-custom {
+            background: rgba(122,158,126,0.10);
+            border: 1px solid rgba(122,158,126,0.30);
+            color: #3d6b45;
+        }
+
+        .alert-danger-custom {
+            background: #fff0ee;
+            border: 1px solid #e8a8a0;
+            color: #b84c40;
+        }
+
+        /* ── Fields ── */
+        .field-group {
+            margin-bottom: 18px;
+        }
+
+        .field-label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 7px;
+        }
+
+        .field-input {
+            width: 100%;
+            background: var(--paper);
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            padding: 11px 15px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.95rem;
+            color: var(--ink);
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .field-input:focus {
+            border-color: var(--terracotta);
+            box-shadow: 0 0 0 3px rgba(196,114,74,0.10);
+        }
+
+        .field-input::placeholder { color: var(--border); }
+
+        /* ── Submit ── */
+        .btn-submit {
+            width: 100%;
+            background: var(--terracotta);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 13px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+            box-shadow: 0 4px 16px rgba(196,114,74,0.30);
+            margin-top: 8px;
+        }
+
+        .btn-submit:hover {
+            background: var(--terracotta-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(196,114,74,0.38);
+        }
+
+        .btn-submit:active { transform: translateY(0); }
+
+        /* ── Divider ── */
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin: 26px 0 20px;
+        }
+
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            border-top: 1px dashed var(--border);
+        }
+
+        .divider span {
+            font-size: 0.75rem;
+            color: var(--muted);
+            letter-spacing: 0.05em;
+        }
+
+        /* ── Register link ── */
+        .register-line {
+            text-align: center;
+            font-size: 0.875rem;
+            color: var(--muted);
+            font-weight: 300;
+        }
+
+        .register-line a {
+            color: var(--terracotta);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .register-line a:hover { color: var(--terracotta-dark); }
+
+        /* ── Animation ── */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 480px) {
+            .login-card { padding: 28px 22px 26px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-wrap">
+
+    <!-- Brand -->
+    <div class="login-header">
+        <a href="/" class="brand-link">
+            <div class="brand-icon">🧭</div>
+            <div class="brand-name">Gezi <em>Günlüğüm</em></div>
+        </a>
+    </div>
+
+    <!-- Card -->
+    <div class="login-card">
+
+        <h2 class="card-heading">Tekrar hoş geldin</h2>
+        <p class="card-sub">Devam etmek için giriş yap.</p>
+
+        <!-- Success: profile update -->
+        <div th:if="${success}" class="alert-custom alert-success-custom">
+            ✦ Profil bilgilerin güncellendi. Lütfen tekrar giriş yap.
+        </div>
+
+        <!-- Error: wrong credentials -->
+        <div th:if="${param.error}" class="alert-custom alert-danger-custom">
+            ⚠ Kullanıcı adı veya şifre hatalı.
+        </div>
+
+        <!-- Success: new registration -->
+        <div th:if="${param.success}" class="alert-custom alert-success-custom">
+            ✦ Hesabın oluşturuldu! Şimdi giriş yapabilirsin.
+        </div>
+
+        <form th:action="@{/login}" method="post">
+            <div class="field-group">
+                <label class="field-label">Kullanıcı Adı</label>
+                <input type="text" name="username" class="field-input" placeholder="kullanici_adin" required>
+            </div>
+            <div class="field-group">
+                <label class="field-label">Şifre</label>
+                <input type="password" name="password" class="field-input" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="btn-submit">Giriş Yap</button>
+        </form>
+
+        <div class="divider"><span>veya</span></div>
+
+        <p class="register-line">
+            Henüz kayıt olmadın mı? <a th:href="@{/register}">Kayıt Ol</a>
+        </p>
+
+    </div>
+</div>
+
+</body>
+</html>

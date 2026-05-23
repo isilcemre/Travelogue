@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Gezi Günlüğüm</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <style>
+        :root {
+            --ink: #1a1a2e;
+            --paper: #f5f0e8;
+            --sand: #e8dfc8;
+            --terracotta: #c4724a;
+            --terracotta-dark: #a85c38;
+            --sage: #7a9e7e;
+            --muted: #8a8070;
+            --border: #d4c9b0;
+            --card-bg: #fffdf7;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            min-height: 100vh;
+            background-color: var(--paper);
+            background-image:
+                radial-gradient(ellipse at 15% 30%, rgba(196,114,74,0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 85% 70%, rgba(122,158,126,0.08) 0%, transparent 50%),
+                url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c4724a' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            font-family: 'DM Sans', sans-serif;
+            color: var(--ink);
+        }
+
+        /* ── Navbar ── */
+        .navbar-custom {
+            background: rgba(245,240,232,0.88);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 14px 0;
+            position: sticky;
+            top: 0;
+            z-index: 200;
+        }
+
+        .navbar-brand-custom {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            color: var(--ink) !important;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .brand-icon {
+            width: 34px; height: 34px;
+            background: var(--terracotta);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px;
+            box-shadow: 0 4px 12px rgba(196,114,74,0.3);
+            flex-shrink: 0;
+        }
+
+        .btn-add {
+            background: var(--terracotta);
+            color: #fff !important;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 18px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: background 0.2s, transform 0.15s;
+            box-shadow: 0 4px 12px rgba(196,114,74,0.3);
+            display: inline-flex; align-items: center; gap: 6px;
+        }
+        .btn-add:hover { background: var(--terracotta-dark); transform: translateY(-1px); }
+
+        .btn-profile {
+            background: transparent;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            padding: 7px 16px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.875rem;
+            color: var(--ink);
+            cursor: pointer;
+            display: inline-flex; align-items: center; gap: 8px;
+            transition: border-color 0.2s, color 0.2s;
+        }
+        .btn-profile:hover { border-color: var(--terracotta); color: var(--terracotta); }
+
+        .avatar-sm {
+            width: 24px; height: 24px;
+            background: var(--sand);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--terracotta);
+            border: 1px solid var(--border);
+        }
+
+        /* ── Page content ── */
+        .page-content {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 40px 20px 80px;
+        }
+
+        /* ── Section title ── */
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            color: var(--ink);
+            margin-bottom: 4px;
+        }
+        .section-title em { font-style: italic; color: var(--terracotta); }
+        .section-subtitle {
+            font-size: 0.82rem;
+            color: var(--muted);
+            font-weight: 300;
+            margin-bottom: 20px;
+        }
+
+        /* ── Alert ── */
+        .alert-custom {
+            background: #fff8f5;
+            border: 1px solid #f5c9b3;
+            border-radius: 10px;
+            padding: 12px 18px;
+            font-size: 0.875rem;
+            color: var(--terracotta-dark);
+            margin-bottom: 20px;
+            display: flex; align-items: center; gap: 10px;
+        }
+
+        /* ── Search ── */
+        .search-wrap {
+            position: relative;
+            margin-bottom: 28px;
+        }
+        .search-icon {
+            position: absolute;
+            left: 14px; top: 50%;
+            transform: translateY(-50%);
+            color: var(--muted);
+            font-size: 0.9rem;
+            pointer-events: none;
+        }
+        .search-input {
+            width: 100%;
+            background: var(--card-bg);
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            padding: 11px 16px 11px 40px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.93rem;
+            color: var(--ink);
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .search-input:focus {
+            border-color: var(--terracotta);
+            box-shadow: 0 0 0 3px rgba(196,114,74,0.10);
+        }
+        .search-input::placeholder { color: var(--muted); }
+
+        /* ── Map ── */
+        .map-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 32px;
+            box-shadow: 0 2px 0 var(--sand), 0 8px 32px rgba(26,26,46,0.08);
+            position: relative;
+        }
+        .map-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--terracotta) 0%, var(--sage) 100%);
+            z-index: 10;
+        }
+        #map { height: 380px; width: 100%; }
+
+        /* ── Gezi list ── */
+        .gezi-list { display: flex; flex-direction: column; gap: 10px; }
+
+        .gezi-item {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+            box-shadow: 0 1px 4px rgba(26,26,46,0.05);
+            text-decoration: none;
+            color: inherit;
+        }
+        .gezi-item:hover {
+            border-color: var(--terracotta);
+            transform: translateX(4px);
+            box-shadow: 0 4px 16px rgba(196,114,74,0.12);
+            color: inherit;
+        }
+
+        .gezi-item-left { display: flex; align-items: center; gap: 14px; }
+
+        .gezi-pin {
+            width: 38px; height: 38px;
+            background: var(--sand);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+            border: 1px solid var(--border);
+        }
+
+        .gezi-location {
+            font-weight: 500;
+            font-size: 0.95rem;
+            color: var(--ink);
+        }
+        .gezi-location span {
+            font-weight: 300;
+            color: var(--muted);
+            font-size: 0.85rem;
+            display: block;
+            margin-top: 1px;
+        }
+
+        .gezi-arrow {
+            color: var(--terracotta);
+            font-size: 0.85rem;
+            opacity: 0;
+            transition: opacity 0.2s, transform 0.2s;
+        }
+        .gezi-item:hover .gezi-arrow { opacity: 1; transform: translateX(3px); }
+
+        /* ── Modals ── */
+        .modal-content {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            box-shadow: 0 24px 64px rgba(26,26,46,0.18);
+            overflow: hidden;
+        }
+
+        .modal-header {
+            background: var(--paper);
+            border-bottom: 1px solid var(--border);
+            padding: 18px 24px;
+        }
+
+        .modal-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.15rem;
+            color: var(--ink);
+        }
+
+        .modal-body { padding: 24px; }
+        .modal-footer {
+            border-top: 1px dashed var(--border);
+            padding: 16px 24px;
+            background: var(--paper);
+        }
+
+        .modal-gezi-img {
+            width: 100%;
+            max-height: 380px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .no-photo-box {
+            background: var(--sand);
+            border: 1px dashed var(--border);
+            border-radius: 10px;
+            padding: 40px 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            color: var(--muted);
+        }
+
+        .notes-label {
+            font-size: 0.72rem;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+
+        .notes-body {
+            font-size: 0.93rem;
+            color: var(--ink);
+            line-height: 1.7;
+            font-weight: 300;
+        }
+
+        .btn-modal-close {
+            background: transparent;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 18px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.875rem;
+            color: var(--muted);
+            cursor: pointer;
+            transition: border-color 0.2s, color 0.2s;
+        }
+        .btn-modal-close:hover { border-color: var(--ink); color: var(--ink); }
+
+        .btn-modal-delete {
+            background: transparent;
+            border: 1.5px solid #e8a8a0;
+            border-radius: 8px;
+            padding: 8px 18px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.875rem;
+            color: #b84c40;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s, border-color 0.2s;
+            display: inline-flex; align-items: center; gap: 6px;
+        }
+        .btn-modal-delete:hover { background: #fff0ee; border-color: #b84c40; color: #b84c40; }
+
+        /* ── Profile modal ── */
+        .profile-avatar {
+            width: 44px; height: 44px;
+            background: var(--sand);
+            border-radius: 50%;
+            border: 2px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--terracotta);
+            flex-shrink: 0;
+        }
+
+        .profile-menu-item {
+            display: block;
+            width: 100%;
+            padding: 14px 20px;
+            background: transparent;
+            border: none;
+            border-top: 1px dashed var(--border);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.9rem;
+            color: var(--ink);
+            text-align: left;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.15s;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .profile-menu-item:hover { background: var(--sand); color: var(--ink); }
+        .profile-menu-item.danger { color: #b84c40; }
+        .profile-menu-item.danger:hover { background: #fff0ee; }
+
+        /* ── Form inputs in modals ── */
+        .field-label {
+            font-size: 0.75rem;
+            font-weight: 500;
+            letter-spacing: 0.07em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 6px;
+            display: block;
+        }
+        .field-input {
+            width: 100%;
+            background: var(--paper);
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.93rem;
+            color: var(--ink);
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            margin-bottom: 14px;
+        }
+        .field-input:focus {
+            border-color: var(--terracotta);
+            box-shadow: 0 0 0 3px rgba(196,114,74,0.10);
+        }
+
+        .info-box {
+            background: rgba(122,158,126,0.08);
+            border: 1px solid rgba(122,158,126,0.25);
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 0.82rem;
+            color: #4a7a52;
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+
+        .btn-submit {
+            width: 100%;
+            background: var(--terracotta);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 12px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.93rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 4px;
+        }
+        .btn-submit:hover { background: var(--terracotta-dark); }
+
+        .error-box {
+            background: #fff0ee;
+            border: 1px solid #e8a8a0;
+            border-radius: 8px;
+            padding: 9px 14px;
+            font-size: 0.82rem;
+            color: #b84c40;
+            margin-bottom: 14px;
+            display: none;
+        }
+
+        /* ── Leaflet popup custom ── */
+        .leaflet-popup-content-wrapper {
+            border-radius: 10px !important;
+            box-shadow: 0 8px 24px rgba(26,26,46,0.15) !important;
+            border: 1px solid var(--border) !important;
+            font-family: 'DM Sans', sans-serif !important;
+        }
+        .leaflet-popup-tip { background: var(--card-bg) !important; }
+
+        /* ── Animations ── */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(14px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .page-content > * { animation: fadeUp 0.5s ease both; }
+        .page-content > *:nth-child(1) { animation-delay: 0.05s; }
+        .page-content > *:nth-child(2) { animation-delay: 0.12s; }
+        .page-content > *:nth-child(3) { animation-delay: 0.18s; }
+        .page-content > *:nth-child(4) { animation-delay: 0.24s; }
+        .page-content > *:nth-child(5) { animation-delay: 0.30s; }
+
+        @media (max-width: 560px) {
+            .page-content { padding: 24px 14px 60px; }
+            #map { height: 260px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar-custom">
+    <div class="container d-flex align-items-center justify-content-between">
+        <a href="/" class="navbar-brand-custom">
+            <div class="brand-icon">🧭</div>
+            Gezi Günlüğüm
+        </a>
+        <div class="d-flex align-items-center gap-2">
+            <a th:href="@{/save}" class="btn-add">
+                <span>＋</span> Yeni Yer
+            </a>
+            <button type="button" class="btn-profile" data-bs-toggle="modal" data-bs-target="#profilMenuModal">
+                <div class="avatar-sm">
+                    <span th:text="${#strings.substring(#authentication.name, 0, 1).toUpperCase()}">U</span>
+                </div>
+                <span th:text="${#authentication.name}">Profilim</span>
+            </button>
+        </div>
+    </div>
+</nav>
+
+<div class="page-content">
+
+    <!-- Page title -->
+    <div>
+        <h2 class="section-title">Tüm <em>Gezilerim</em></h2>
+        <p class="section-subtitle">Keşfettiğin yerleri haritada gör, anılarına geri dön.</p>
+    </div>
+
+    <!-- Error alert -->
+    <div th:if="${error}" class="alert-custom">
+        ⚠️ <span th:text="${error}"></span>
+    </div>
+
+    <!-- Search -->
+    <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="geziSearchInput" class="search-input"
+               placeholder="Ülke veya şehir ara, Enter'a bas...">
+    </div>
+
+    <!-- Map -->
+    <div class="map-card">
+        <div id="map"></div>
+    </div>
+
+    <!-- Gezi list -->
+    <div>
+        <p class="section-subtitle" style="margin-bottom:14px;">Kayıtlı Yerler</p>
+        <div class="gezi-list">
+            <div th:each="gezi : ${geziler}"
+                 class="gezi-item"
+                 data-bs-toggle="modal"
+                 th:data-bs-target="'#modal' + ${gezi.id}">
+                <div class="gezi-item-left">
+                    <div class="gezi-pin">📍</div>
+                    <div class="gezi-location">
+                        <span th:text="${gezi.ulkeAdi}" style="display:inline; font-size:0.93rem; font-weight:500; color:var(--ink);"></span>
+                        <span th:text="'/ ' + ${gezi.sehirAdi}"></span>
+                    </div>
+                </div>
+                <span class="gezi-arrow">→</span>
+            </div>
+        </div>
+    </div>
+
+</div><!-- /page-content -->
+
+<!-- ── Gezi Detail Modals ── -->
+<div th:each="gezi : ${geziler}" class="modal fade" th:id="'modal' + ${gezi.id}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" th:text="${gezi.ulkeAdi} + ' / ' + ${gezi.sehirAdi}"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+            </div>
+            <div class="modal-body">
+                <div th:if="${gezi.fotograf != null}">
+                    <img th:src="@{'/gezi/resim/' + ${gezi.id}}" class="modal-gezi-img" alt="Gezi Fotoğrafı">
+                </div>
+                <div th:unless="${gezi.fotograf != null}" class="no-photo-box">
+                    📸 Bu geziye henüz bir fotoğraf eklenmemiş.
+                </div>
+                <p class="notes-label">Notlarım</p>
+                <p class="notes-body" th:text="${gezi.aciklama}"></p>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn-modal-close" data-bs-dismiss="modal">Kapat</button>
+                <a th:href="@{'/geziler/sil/' + ${gezi.id}}" class="btn-modal-delete"
+                   onclick="return confirm('Bu kaydı silmek istediğinize emin misiniz?')">
+                    🗑 Bu Geziyi Sil
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── Search Result Modal ── -->
+<div class="modal fade" id="geziResultModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Bulunan Geziler</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div id="geziResultList"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── Profile Menu Modal ── -->
+<div class="modal fade" id="profilMenuModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered" style="max-width:320px;">
+        <div class="modal-content">
+            <div class="modal-header" style="border-bottom:none; padding-bottom:12px;">
+                <div class="d-flex align-items-center gap-3 w-100">
+                    <div class="profile-avatar">
+                        <span th:text="${#strings.substring(#authentication.name, 0, 1).toUpperCase()}">U</span>
+                    </div>
+                    <div>
+                        <div style="font-weight:500; font-size:0.95rem;" th:text="${#authentication.name}">Kullanıcı</div>
+                        <div style="font-size:0.78rem; color:var(--muted); font-weight:300;">Hoş geldin! ✦</div>
+                    </div>
+                    <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal"></button>
+                </div>
+            </div>
+            <div class="modal-body p-0">
+                <button class="profile-menu-item" data-bs-target="#userModal" data-bs-toggle="modal">
+                    👤 <span>Kullanıcı Adını Değiştir</span>
+                </button>
+                <button class="profile-menu-item" data-bs-target="#passModal" data-bs-toggle="modal">
+                    🔑 <span>Şifre Değiştir</span>
+                </button>
+                <a th:href="@{/logout}" class="profile-menu-item danger"
+                   onclick="return confirm('Çıkış yapmak istediğinize emin misiniz?')">
+                    🚪 <span>Çıkış Yap</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── Username Update Modal ── -->
+<div class="modal fade" id="userModal" aria-hidden="true" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Kullanıcı Adı Güncelle</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form th:action="@{/profil/guncelle/username}" method="post"
+                  onsubmit="return checkUsername(this)">
+                <div class="modal-body">
+                    <!-- Hata kutusu (gizli başlar) -->
+                    <div id="usernameError" class="error-box"></div>
+
+                    <div class="info-box">
+                        ℹ️ Değişiklik sonrası oturumunuz sonlandırılacak ve giriş ekranına yönlendirileceksiniz.
+                    </div>
+                    <label class="field-label">Yeni Kullanıcı Adı</label>
+                    <input type="text" name="username" id="newUsernameInput"
+                           class="field-input" placeholder="Örn: gezgin_yeni" required>
+                    <button type="submit" class="btn-submit">Güncelle</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ── Password Update Modal ── -->
+<div class="modal fade" id="passModal" aria-hidden="true" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Şifre Güncelle</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="modalError" class="error-box"></div>
+                <label class="field-label">Mevcut Şifreniz</label>
+                <input type="password" id="oldP" class="field-input" required>
+                <label class="field-label">Yeni Şifre</label>
+                <input type="password" id="p1" class="field-input" required>
+                <label class="field-label">Yeni Şifre (Tekrar)</label>
+                <input type="password" id="p2" class="field-input" required>
+                <button type="button" onclick="submitPasswordForm()" class="btn-submit">Şifreyi Güncelle</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+    // Search
+    document.getElementById('geziSearchInput').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') filterGeziler();
+    });
+
+    function filterGeziler() {
+        const input = document.getElementById('geziSearchInput').value.toLowerCase();
+        const resultList = document.getElementById('geziResultList');
+        const resultModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('geziResultModal'));
+
+        if (input.length < 2) { resultModal.hide(); return; }
+
+        const items = Array.from(document.querySelectorAll('.gezi-item'));
+        const matches = items.filter(item =>
+            item.querySelector('.gezi-location').textContent.toLowerCase().includes(input)
+        );
+
+        resultList.innerHTML = '';
+        if (matches.length > 0) {
+            matches.forEach(match => {
+                const targetId = match.getAttribute('data-bs-target');
+                const title = match.querySelector('.gezi-location').textContent.trim().replace(/\s+/g, ' ');
+                const btn = document.createElement('button');
+                btn.className = 'profile-menu-item';
+                btn.innerHTML = `📍 <span>${title}</span>`;
+                btn.onclick = () => {
+                    resultModal.hide();
+                    setTimeout(() => new bootstrap.Modal(document.querySelector(targetId)).show(), 400);
+                };
+                resultList.appendChild(btn);
+            });
+        } else {
+            resultList.innerHTML = '<div style="padding:28px; text-align:center; color:var(--muted); font-size:0.875rem;">Aradığınız kriterde bir gezi bulunamadı.</div>';
+        }
+        resultModal.show();
+    }
+
+    // Password form
+    async function submitPasswordForm() {
+
+        const oldPassword = document.getElementById('oldP').value;
+        const password = document.getElementById('p1').value;
+        const p2 = document.getElementById('p2').value;
+
+        if (password.length < 6) {
+            showError('Şifre en az 6 karakter olmalıdır!');
+            setFieldError('passwordInput', 'passwordHint', 'En az 6 karakter giriniz.');
+            return false;
+        }
+        if (password !== p2) { showError("Yeni şifreler uyuşmuyor!"); return; }
+        if (password === oldPassword) { showError("Yeni şifre eskisinden farklı olmalı!"); return; }
+
+        const formData = new FormData();
+        formData.append('oldPassword', oldPassword);
+        formData.append('password', password);
+
+        const response = await fetch('/profil/guncelle/password', { method: 'POST', body: formData });
+        const result = await response.text();
+
+        if (response.ok && result === "OK") {
+            window.location.href = "/geziler?success_type=password";
+        } else {
+            showError(result);
+        }
+    }
+
+    function showError(msg) {
+        const el = document.getElementById('modalError');
+        el.textContent = msg;
+        el.style.display = 'block';
+    }
+</script>
+
+<script th:inline="javascript">
+    var currentUsername = /*[[${#authentication.name}]]*/ '';
+    console.log('Mevcut kullanıcı adı:', currentUsername);
+
+    function checkUsername(form) {
+        var newUsernameInput = document.getElementById('newUsernameInput');
+        var newUsername = newUsernameInput.value.trim();
+        var errorEl = document.getElementById('usernameError');
+
+        // Hata gösterme yardımcı fonksiyonu
+        function showFieldError(message) {
+            errorEl.textContent = message;
+            errorEl.style.display = 'block';
+        }
+
+        errorEl.style.display = 'none'; // Her kontrolden önce temizle
+
+        if (newUsername.length < 6) {
+            showFieldError('Kullanıcı adı en az 6 karakter olmalıdır!');
+            return false;
+        }
+
+        if (newUsername === currentUsername) {
+            showFieldError('Yeni kullanıcı adı mevcut adınızdan farklı olmalıdır!');
+            return false;
+        }
+
+        return true;
+    }
+</script>
+
+<script th:inline="javascript">
+    var map = L.map('map', { zoomControl: true }).setView([20, 0], 2);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    // Custom marker icon
+    var pinIcon = L.divIcon({
+        className: '',
+        html: '<div style="width:28px;height:28px;background:var(--terracotta);border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid #fff;box-shadow:0 2px 8px rgba(196,114,74,0.4);"></div>',
+        iconSize: [28, 28],
+        iconAnchor: [14, 28],
+        popupAnchor: [0, -30]
+    });
+
+    /*[# th:each="gezi : ${geziler}"]*/
+    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=[[${gezi.sehirAdi}]],[[${gezi.ulkeAdi}]]`)
+        .then(r => r.json()).then(data => {
+            if (data.length > 0) {
+                var lat = data[0].lat;
+                var lon = data[0].lon;
+                var marker = L.marker([lat, lon], { icon: pinIcon }).addTo(map);
+
+                var popupContent = `
+                    <div style="font-family:'DM Sans',sans-serif; min-width:160px; text-align:center;">
+                        <div style="font-weight:500; font-size:0.88rem; margin-bottom:8px; color:#1a1a2e;">
+                            [[${gezi.ulkeAdi}]] / [[${gezi.sehirAdi}]]
+                        </div>
+                        <div style="width:100%;height:90px;overflow:hidden;border-radius:7px;background:#f0ebe0;display:flex;align-items:center;justify-content:center;">
+                            ${ [[${gezi.fotograf != null}]]
+                                ? `<img src="/gezi/resim/[[${gezi.id}]]" style="width:100%;height:100%;object-fit:cover;">`
+                                : `<span style="font-size:11px;color:#8a8070;">📸 Fotoğraf yok</span>`
+                            }
+                        </div>
+                    </div>
+                `;
+
+                marker.on('mouseover', function () {
+                    this.bindPopup(popupContent, { closeButton: false, offset: L.point(0, -10) }).openPopup();
+                });
+                marker.on('mouseout', function () { this.closePopup(); });
+                marker.on('click', function () {
+                    new bootstrap.Modal(document.querySelector('#modal[[${gezi.id}]]')).show();
+                });
+            }
+        });
+    /*[/]*/
+</script>
+
+</body>
+</html>

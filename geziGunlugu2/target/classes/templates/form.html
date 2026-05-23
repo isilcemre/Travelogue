@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Yeni Gezi Ekle</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+    <style>
+        :root {
+            --ink: #1a1a2e;
+            --paper: #f5f0e8;
+            --sand: #e8dfc8;
+            --terracotta: #c4724a;
+            --terracotta-dark: #a85c38;
+            --sage: #7a9e7e;
+            --muted: #8a8070;
+            --border: #d4c9b0;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            min-height: 100vh;
+            background-color: var(--paper);
+            background-image:
+                radial-gradient(ellipse at 10% 20%, rgba(196,114,74,0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 90% 80%, rgba(122,158,126,0.10) 0%, transparent 50%),
+                url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c4724a' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            font-family: 'DM Sans', sans-serif;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 48px 16px 64px;
+        }
+
+        .page-wrapper {
+            width: 100%;
+            max-width: 680px;
+        }
+
+        /* ── Header ── */
+        .page-header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeDown 0.6s ease both;
+        }
+
+        .compass-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 56px;
+            height: 56px;
+            background: var(--terracotta);
+            border-radius: 50%;
+            margin-bottom: 16px;
+            font-size: 26px;
+            box-shadow: 0 8px 24px rgba(196,114,74,0.35);
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 8px 24px rgba(196,114,74,0.35); }
+            50%       { box-shadow: 0 12px 32px rgba(196,114,74,0.55); }
+        }
+
+        .page-header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2rem;
+            color: var(--ink);
+            line-height: 1.2;
+        }
+
+        .page-header h1 em {
+            font-style: italic;
+            color: var(--terracotta);
+        }
+
+        .page-header p {
+            margin-top: 8px;
+            color: var(--muted);
+            font-size: 0.9rem;
+            font-weight: 300;
+            letter-spacing: 0.04em;
+        }
+
+        /* ── Card ── */
+        .form-card {
+            background: #fffdf7;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 44px 48px;
+            box-shadow:
+                0 2px 0 var(--sand),
+                0 4px 0 rgba(196,114,74,0.08),
+                0 16px 60px rgba(26,26,46,0.10);
+            animation: fadeUp 0.7s ease 0.15s both;
+            position: relative;
+        }
+
+        .form-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--terracotta) 0%, var(--sage) 100%);
+            border-radius: 20px 20px 0 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ── Form steps decoration ── */
+        .form-step {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+            margin-bottom: 28px;
+            animation: fadeUp 0.5s ease both;
+            position: static;
+            overflow: visible;
+        }
+
+        .form-step:nth-child(1) { animation-delay: 0.2s; }
+        .form-step:nth-child(2) { animation-delay: 0.3s; }
+        .form-step:nth-child(3) { animation-delay: 0.4s; }
+        .form-step:nth-child(4) { animation-delay: 0.5s; }
+
+        .step-number {
+            flex-shrink: 0;
+            width: 32px;
+            height: 32px;
+            background: var(--sand);
+            border: 1.5px solid var(--border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--terracotta);
+            margin-top: 4px;
+        }
+
+        .step-body {
+            flex: 1;
+        }
+
+        .step-body label {
+            display: block;
+            font-size: 0.78rem;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+
+        /* ── Inputs ── */
+        .form-control,
+        .ts-wrapper .ts-control {
+            background: var(--paper) !important;
+            border: 1.5px solid var(--border) !important;
+            border-radius: 10px !important;
+            font-family: 'DM Sans', sans-serif !important;
+            font-size: 0.95rem !important;
+            color: var(--ink) !important;
+            padding: 11px 16px !important;
+            transition: border-color 0.2s, box-shadow 0.2s !important;
+            box-shadow: none !important;
+        }
+
+        .form-control:focus {
+            border-color: var(--terracotta) !important;
+            box-shadow: 0 0 0 3px rgba(196,114,74,0.12) !important;
+            outline: none;
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 110px;
+            line-height: 1.6;
+        }
+
+        /* ── TomSelect custom ── */
+        .ts-wrapper {
+            position: relative;
+            z-index: 100;
+        }
+
+        .ts-wrapper.focus {
+            z-index: 200;
+        }
+
+        .ts-wrapper.single .ts-control {
+            padding-right: 40px !important;
+        }
+
+        .ts-wrapper.single .ts-control::after {
+            content: '▾';
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--muted);
+            font-size: 0.85rem;
+            pointer-events: none;
+        }
+
+        .ts-dropdown {
+            border: 1.5px solid var(--border) !important;
+            border-radius: 10px !important;
+            box-shadow: 0 8px 32px rgba(26,26,46,0.12) !important;
+            font-family: 'DM Sans', sans-serif !important;
+            overflow: hidden !important;
+            background: #fffdf7 !important;
+            z-index: 9999 !important;
+            position: absolute !important;
+        }
+
+        .ts-dropdown .option {
+            padding: 10px 16px !important;
+            font-size: 0.93rem !important;
+            color: var(--ink) !important;
+            transition: background 0.15s !important;
+        }
+
+        .ts-dropdown .option:hover,
+        .ts-dropdown .option.active {
+            background: var(--sand) !important;
+            color: var(--terracotta) !important;
+        }
+
+        .ts-dropdown .option.selected {
+            background: rgba(196,114,74,0.08) !important;
+        }
+
+        /* ── File upload ── */
+        .upload-zone {
+            border: 2px dashed var(--border);
+            border-radius: 10px;
+            background: var(--paper);
+            padding: 28px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+            position: relative;
+        }
+
+        .upload-zone:hover {
+            border-color: var(--terracotta);
+            background: rgba(196,114,74,0.04);
+        }
+
+        .upload-zone input[type="file"] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+        }
+
+        .upload-icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .upload-zone p {
+            font-size: 0.88rem;
+            color: var(--muted);
+            margin: 0;
+        }
+
+        .upload-zone p strong {
+            color: var(--terracotta);
+            font-weight: 500;
+        }
+
+        .upload-preview {
+            display: none;
+            margin-top: 12px;
+            font-size: 0.82rem;
+            color: var(--sage);
+            font-weight: 500;
+        }
+
+        /* ── Divider ── */
+        .form-divider {
+            border: none;
+            border-top: 1px dashed var(--border);
+            margin: 32px 0;
+        }
+
+        /* ── Buttons ── */
+        .btn-row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            animation: fadeUp 0.5s ease 0.6s both;
+        }
+
+        .btn-save {
+            flex: 1;
+            background: var(--terracotta);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 13px 24px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 500;
+            letter-spacing: 0.03em;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+            box-shadow: 0 4px 16px rgba(196,114,74,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-save:hover {
+            background: var(--terracotta-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(196,114,74,0.4);
+        }
+
+        .btn-save:active {
+            transform: translateY(0);
+        }
+
+        .btn-cancel {
+            padding: 13px 22px;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            background: transparent;
+            color: var(--muted);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.95rem;
+            text-decoration: none;
+            transition: border-color 0.2s, color 0.2s;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .btn-cancel:hover {
+            border-color: var(--ink);
+            color: var(--ink);
+        }
+
+        /* ── Animations ── */
+        @keyframes fadeDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 600px) {
+            .form-card { padding: 28px 20px; }
+            .page-header h1 { font-size: 1.7rem; }
+            .form-step { gap: 14px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="page-wrapper">
+
+    <!-- Header -->
+    <div class="page-header">
+        <div class="compass-icon">🧭</div>
+        <h1>Yeni Bir Yer <em>Keşfet</em></h1>
+        <p>Gezdiğin yeri kaydet, anılarını ölümsüzleştir.</p>
+    </div>
+
+    <!-- Form Card -->
+    <div class="form-card">
+        <form th:action="@{/save}" th:object="${gezi}" method="post" enctype="multipart/form-data">
+
+            <!-- Ülke -->
+            <div class="form-step">
+                <div class="step-number">1</div>
+                <div class="step-body">
+                    <label>Ülke</label>
+                    <select id="country-select" th:field="*{ulkeAdi}" class="form-control" required>
+                        <option value=""></option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Şehir -->
+            <div class="form-step">
+                <div class="step-number">2</div>
+                <div class="step-body">
+                    <label>Şehir</label>
+                    <select id="city-select" th:field="*{sehirAdi}" class="form-control" required>
+                        <option value=""></option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Açıklama -->
+            <div class="form-step">
+                <div class="step-number">3</div>
+                <div class="step-body">
+                    <label>Gezim Nasıldı?</label>
+                    <textarea th:field="*{aciklama}" class="form-control"
+                              placeholder="Anılarınızı buraya yazın... Neler gördünüz, neler hissettiniz?" required></textarea>
+                </div>
+            </div>
+
+            <!-- Fotoğraf -->
+            <div class="form-step">
+                <div class="step-number">4</div>
+                <div class="step-body">
+                    <label>Fotoğraf</label>
+                    <div class="upload-zone" id="upload-zone">
+                        <input type="file" name="file" id="file-input" accept="image/*" required>
+                        <div class="upload-icon">🌄</div>
+                        <p><strong>Fotoğraf seç</strong> veya buraya sürükle</p>
+                        <p style="margin-top:4px; font-size:0.78rem;">JPG, PNG, WEBP · Yükleme zorunludur</p>
+                    </div>
+                    <div class="upload-preview" id="upload-preview">✓ <span id="file-name"></span></div>
+                </div>
+            </div>
+
+            <hr class="form-divider">
+
+            <!-- Butonlar -->
+            <div class="btn-row">
+                <button type="submit" class="btn-save">
+                    <span>💾</span> Geziyi Kaydet
+                </button>
+                <a th:href="@{/geziler}" class="btn-cancel">İptal</a>
+            </div>
+
+        </form>
+    </div>
+
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
+<script>
+    let countryTom, cityTom;
+
+    // File upload preview
+    document.getElementById('file-input').addEventListener('change', function () {
+        const preview = document.getElementById('upload-preview');
+        const nameEl  = document.getElementById('file-name');
+        if (this.files.length > 0) {
+            nameEl.textContent = this.files[0].name;
+            preview.style.display = 'block';
+        }
+    });
+
+    // Drag over style
+    const zone = document.getElementById('upload-zone');
+    zone.addEventListener('dragover', () => zone.style.borderColor = 'var(--terracotta)');
+    zone.addEventListener('dragleave', () => zone.style.borderColor = 'var(--border)');
+
+    // ÜLKELERİ GETİR
+    fetch("https://restcountries.com/v3.1/all?fields=name")
+        .then(r => r.json())
+        .then(data => {
+            const countrySelect = document.getElementById("country-select");
+
+            data.sort((a, b) => a.name.common.localeCompare(b.name.common))
+                .forEach(country => {
+                    const option = document.createElement("option");
+                    option.value = country.name.common;
+                    option.textContent = country.name.common;
+                    countrySelect.appendChild(option);
+                });
+
+            countryTom = new TomSelect("#country-select", {
+                create: false,
+                placeholder: "Ülke seçiniz...",
+                maxOptions: null,
+                allowEmptyOption: false,
+                dropdownParent: 'body'
+            });
+            countryTom.clear();
+
+            cityTom = new TomSelect("#city-select", {
+                create: false,
+                placeholder: "Önce ülke seçiniz...",
+                maxOptions: null,
+                allowEmptyOption: false,
+                dropdownParent: 'body'
+            });
+
+            countryTom.on("change", function (value) {
+                cityTom.clear();
+                cityTom.clearOptions();
+                if (!value) return;
+
+                fetch("https://countriesnow.space/api/v0.1/countries/cities", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ country: value })
+                })
+                .then(r => r.json())
+                .then(cityData => {
+                    if (cityData.data) {
+                        cityData.data.forEach(city => {
+                            cityTom.addOption({ value: city, text: city });
+                        });
+                        cityTom.refreshOptions(false);
+                    }
+                });
+            });
+        });
+</script>
+</body>
+</html>

@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Gezi Günlüğü</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+    <style>
+        :root {
+            --ink: #1a1a2e;
+            --paper: #f5f0e8;
+            --sand: #e8dfc8;
+            --terracotta: #c4724a;
+            --terracotta-dark: #a85c38;
+            --sage: #7a9e7e;
+            --muted: #8a8070;
+            --border: #d4c9b0;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            min-height: 100vh;
+            background-color: var(--paper);
+            background-image:
+                radial-gradient(ellipse at 15% 30%, rgba(196,114,74,0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 85% 70%, rgba(122,158,126,0.10) 0%, transparent 50%),
+                url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c4724a' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            font-family: 'DM Sans', sans-serif;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── Navbar ── */
+        .navbar-custom {
+            background: rgba(245,240,232,0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 14px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            animation: fadeDown 0.5s ease both;
+        }
+
+        .navbar-brand-custom {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.25rem;
+            color: var(--ink) !important;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .brand-icon {
+            width: 34px;
+            height: 34px;
+            background: var(--terracotta);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            box-shadow: 0 4px 12px rgba(196,114,74,0.3);
+        }
+
+        .btn-nav-outline {
+            border: 1.5px solid var(--border);
+            color: var(--ink);
+            background: transparent;
+            border-radius: 8px;
+            padding: 7px 18px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.875rem;
+            font-weight: 400;
+            text-decoration: none;
+            transition: border-color 0.2s, color 0.2s;
+        }
+
+        .btn-nav-outline:hover {
+            border-color: var(--terracotta);
+            color: var(--terracotta);
+        }
+
+        .btn-nav-fill {
+            background: var(--terracotta);
+            color: #fff !important;
+            border: none;
+            border-radius: 8px;
+            padding: 7px 18px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+
+        .btn-nav-fill:hover { background: var(--terracotta-dark); }
+
+        /* ── Hero ── */
+        .hero {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 80px 24px 100px;
+        }
+
+        .hero-inner {
+            max-width: 640px;
+            animation: fadeUp 0.7s ease 0.1s both;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: var(--sand);
+            border: 1px solid var(--border);
+            color: var(--terracotta);
+            font-size: 0.75rem;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            border-radius: 999px;
+            padding: 5px 16px;
+            margin-bottom: 28px;
+        }
+
+        .hero-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.4rem, 6vw, 3.6rem);
+            color: var(--ink);
+            line-height: 1.15;
+            margin-bottom: 20px;
+        }
+
+        .hero-title em {
+            font-style: italic;
+            color: var(--terracotta);
+        }
+
+        .hero-sub {
+            font-size: 1.05rem;
+            color: var(--muted);
+            font-weight: 300;
+            line-height: 1.7;
+            max-width: 480px;
+            margin: 0 auto 36px;
+        }
+
+        .btn-hero {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--terracotta);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 15px 34px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 1rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+            box-shadow: 0 6px 24px rgba(196,114,74,0.35);
+        }
+
+        .btn-hero:hover {
+            background: var(--terracotta-dark);
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(196,114,74,0.4);
+        }
+
+        .btn-hero:active { transform: translateY(0); }
+
+        /* ── Divider ── */
+        .hero-divider {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            max-width: 300px;
+            margin: 32px auto 0;
+        }
+
+        .hero-divider::before,
+        .hero-divider::after {
+            content: '';
+            flex: 1;
+            border-top: 1px dashed var(--border);
+        }
+
+        .hero-divider span {
+            font-size: 0.78rem;
+            color: var(--muted);
+            letter-spacing: 0.06em;
+        }
+
+        /* ── Feature pills ── */
+        .features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 28px;
+            animation: fadeUp 0.7s ease 0.35s both;
+        }
+
+        .feature-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            background: #fffdf7;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 7px 16px;
+            font-size: 0.82rem;
+            color: var(--ink);
+            font-weight: 400;
+        }
+
+        .pill-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        /* ── Decorative pin strip ── */
+        .pin-strip {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            margin-top: 64px;
+            padding: 28px 24px;
+            border-top: 1px dashed var(--border);
+            animation: fadeUp 0.7s ease 0.5s both;
+        }
+
+        .pin-item {
+            text-align: center;
+        }
+
+        .pin-emoji {
+            font-size: 1.6rem;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .pin-label {
+            font-size: 0.75rem;
+            color: var(--muted);
+            font-weight: 300;
+            letter-spacing: 0.04em;
+        }
+
+        /* ── Footer ── */
+        footer {
+            padding: 20px 24px;
+            text-align: center;
+            border-top: 1px solid var(--border);
+            font-size: 0.78rem;
+            color: var(--muted);
+            font-weight: 300;
+        }
+
+        /* ── Animations ── */
+        @keyframes fadeDown {
+            from { opacity: 0; transform: translateY(-12px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 480px) {
+            .hero { padding: 60px 16px 80px; }
+            .btn-nav-outline, .btn-nav-fill { padding: 6px 12px; font-size: 0.82rem; }
+            .pin-strip { gap: 18px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar-custom">
+    <div class="container d-flex align-items-center justify-content-between">
+        <a href="/" class="navbar-brand-custom">
+            <div class="brand-icon">🧭</div>
+            Gezi Günlüğüm
+        </a>
+        <div class="d-flex align-items-center gap-2">
+            <a th:href="@{/login}"    class="btn-nav-outline">Giriş Yap</a>
+            <a th:href="@{/register}" class="btn-nav-fill">Kayıt Ol</a>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+    <div class="hero-inner">
+        <div class="hero-badge">✦ Anılarını Haritalandır</div>
+
+        <h1 class="hero-title">
+            Gezdiğin Yerleri<br>
+            <em>Unutma</em>
+        </h1>
+
+        <p class="hero-sub">
+            Ziyaret ettiğin şehirleri kaydet, fotoğraflarını saklayın ve tüm anılarını harita üzerinde canlı tut.
+        </p>
+
+        <a th:href="@{/register}" class="btn-hero">
+            <span>🗺️</span> Hemen Başla
+        </a>
+
+        <div class="hero-divider">
+            <span>neler sunuyoruz</span>
+        </div>
+
+        <div class="features">
+            <div class="feature-pill">
+                <div class="pill-dot" style="background:var(--terracotta)"></div>
+                Yer & şehir kaydetme
+            </div>
+            <div class="feature-pill">
+                <div class="pill-dot" style="background:var(--sage)"></div>
+                Fotoğraf galerisi
+            </div>
+            <div class="feature-pill">
+                <div class="pill-dot" style="background:#b8a07a"></div>
+                Harita görünümü
+            </div>
+            <div class="feature-pill">
+                <div class="pill-dot" style="background:var(--ink)"></div>
+                Gezi notları
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Pin strip -->
+<div class="pin-strip">
+    <div class="pin-item">
+        <span class="pin-emoji">🗼</span>
+        <div class="pin-label">Paris</div>
+    </div>
+    <div class="pin-item">
+        <span class="pin-emoji">🏯</span>
+        <div class="pin-label">Kyoto</div>
+    </div>
+    <div class="pin-item">
+        <span class="pin-emoji">🌊</span>
+        <div class="pin-label">Santorini</div>
+    </div>
+    <div class="pin-item">
+        <span class="pin-emoji">🦁</span>
+        <div class="pin-label">Nairobi</div>
+    </div>
+    <div class="pin-item">
+        <span class="pin-emoji">🌉</span>
+        <div class="pin-label">New York</div>
+    </div>
+    <div class="pin-item">
+        <span class="pin-emoji">🕌</span>
+        <div class="pin-label">İstanbul</div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer>
+    © 2025 Gezi Günlüğüm — Anıların seninle her yerde.
+</footer>
+
+</body>
+</html>
